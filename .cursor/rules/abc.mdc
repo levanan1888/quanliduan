@@ -1,0 +1,149 @@
+---
+alwaysApply: true
+---
+description: "Laravel 10 PHP 7.4.3 coding conventions & best practices for secure, scalable, and SEO-friendly web development"
+
+globs:  
+  - "app/**/*.php"  
+  - "routes/**/*.php"  
+  - "database/**/*.php"  
+  - "config/**/*.php"  
+  - "tests/**/*.php"  
+
+alwaysApply: true
+
+{
+  "language": "php",
+  "framework": "laravel",
+  "style": {
+    "php_version": "8.2",
+    "laravel_version": "11",
+    "coding_standard": "PSR-12",
+    "naming": {
+      "classes": "StudlyCase",
+      "methods": "camelCase",
+      "variables": "camelCase",
+      "constants": "UPPER_CASE",
+      "files": "StudlyCase for class files, snake_case for migrations and config"
+    },
+    "comments": "Ngắn gọn, rõ ràng, sử dụng tiếng Việt khi cần thiết, ưu tiên tiếng Anh cho dự án quốc tế",
+    "docblocks": {
+      "enabled": true,
+      "format": "PHPDoc",
+      "include": ["param", "return", "throws"],
+      "description": "Cung cấp mô tả chi tiết cho các method và class quan trọng"
+    },
+    "line_length": 120,
+    "indentation": "4 spaces",
+    "strict_types": true,
+    "nullable_types": "Sử dụng khi cần để tăng tính rõ ràng"
+  },
+  "conventions": {
+    "controllers": "Giữ mỏng, chỉ điều phối request đến service, tránh chứa logic nghiệp vụ",
+    "services": "Chứa logic nghiệp vụ chính, dễ dàng tái sử dụng và kiểm thử",
+    "repositories": "Tách biệt logic truy vấn database, ưu tiên Eloquent hoặc Query Builder",
+    "models": {
+      "responsibilities": "Chỉ khai báo quan hệ, casts, fillable, và scopes",
+      "avoid": "Không chứa logic nghiệp vụ phức tạp"
+    },
+    "requests": "Sử dụng FormRequest để validate dữ liệu đầu vào, tích hợp rule tùy chỉnh",
+    "resources": "Dùng Resource và ResourceCollection để format response JSON theo chuẩn REST",
+    "migrations": {
+      "naming": "YYYY_MM_DD_HHMMSS_name_of_migration (e.g., 2025_09_05_080808_create_users_table)",
+      "rules": [
+        "Tách riêng mỗi migration cho một thay đổi duy nhất",
+        "Thêm chú thích rõ ràng",
+        "Không chỉnh sửa migration đã deploy",
+        "Sử dụng schema comments để mô tả cột"
+      ]
+    },
+    "routes": {
+      "naming": "Sử dụng tên route theo chuẩn RESTful, ví dụ: users.index, users.show",
+      "grouping": "Nhóm route theo prefix hoặc middleware",
+      "seo": "Đảm bảo URL ngắn gọn, dễ đọc, chứa từ khóa chính"
+    },
+    "middleware": "Tạo middleware tùy chỉnh cho các yêu cầu như auth, rate limiting, hoặc logging"
+  },
+  "best_practices": {
+    "security": [
+      "Sử dụng Query Builder hoặc Eloquent, chỉ dùng raw query khi không thể thay thế",
+      "Escape dữ liệu khi render view (sử dụng {{ }} thay vì {!! !!})",
+      "Không hardcode secret, lưu trong .env và sử dụng config()",
+      "Bật CSRF protection cho tất cả form POST",
+      "Sử dụng Auth middleware và Gate/Policy cho kiểm soát truy cập",
+      "Kích hoạt rate limiting cho API endpoints",
+      "Áp dụng Content Security Policy (CSP) để ngăn XSS",
+      "Sử dụng HTTPS, cấu hình HSTS trong production",
+      "Mã hóa dữ liệu nhạy cảm (ví dụ: sử dụng Laravel Encryption)"
+    ],
+    "performance": [
+      "Ngăn N+1 query bằng eager loading (with, load)",
+      "Sử dụng cache (Redis/Memcached) cho query nặng hoặc dữ liệu tĩnh",
+      "Áp dụng pagination hoặc lazy loading cho danh sách dữ liệu lớn",
+      "Tối ưu hóa asset với Vite, nén CSS/JS",
+      "Sử dụng CDN cho tài nguyên tĩnh (hình ảnh, CSS, JS)"
+    ],
+    "testing": [
+      "Viết PHPUnit/Dusk tests cho services, repositories, và controllers",
+      "Ưu tiên Feature Tests cho các luồng chính, Unit Tests cho logic phức tạp",
+      "Sử dụng factories và seeders để tạo dữ liệu kiểm thử",
+      "Đảm bảo code coverage tối thiểu 80% cho các module quan trọng"
+    ],
+    "seo": [
+      "Tạo URL thân thiện với SEO: ngắn gọn, chứa từ khóa, không dùng ký tự đặc biệt",
+      "Sử dụng meta tags (title, description, keywords) trong Blade templates",
+      "Tích hợp sitemap XML tự động với package như spatie/laravel-sitemap",
+      "Sử dụng canonical URLs để tránh trùng lặp nội dung",
+      "Tối ưu hóa tốc độ tải trang (lazy loading, image optimization)",
+      "Thêm structured data (JSON-LD) cho các trang sản phẩm hoặc bài viết"
+    ],
+    "scalability": [
+      "Sử dụng Service Container để quản lý dependencies",
+      "Tách biệt logic thành các module hoặc package riêng",
+      "Hỗ trợ microservices bằng cách chuẩn hóa API contract",
+      "Sử dụng Queue (Laravel Horizon) cho tác vụ nặng hoặc chạy nền",
+      "Tận dụng Laravel Octane để tăng hiệu suất xử lý request"
+    ]
+  },
+  "avoid": [
+    "Không tạo hàm/class không cần thiết hoặc không được yêu cầu",
+    "Không sử dụng code snippet lỗi thời hoặc deprecated",
+    "Không sửa code không liên quan trong file",
+    "Tránh lặp lại logic (DRY - Don't Repeat Yourself)",
+    "Không bỏ qua logging cho các tác vụ quan trọng"
+  ],
+  "examples": {
+    "service_class": "App\\Services\\UserService",
+    "repository_class": "App\\Repositories\\UserRepository",
+    "request_class": "App\\Http\\Requests\\StoreUserRequest",
+    "resource_class": "App\\Http\\Resources\\UserResource",
+    "middleware_class": "App\\Http\\Middleware\\EnsureUserIsVerified"
+  },
+  "environment": {
+    "os": "Windows/Linux (ưu tiên Linux cho production)",
+    "tools": [
+      "Laragon (Windows) hoặc Docker (Linux) để chạy PHP 8.2 và Laravel 11",
+      "Windows Command Prompt, PowerShell, hoặc Terminal (Linux) để chạy Artisan",
+      "Composer 2.x cho quản lý package",
+      "Vite để build và bundle asset"
+    ],
+    "configuration": [
+      "Cấu hình môi trường qua file .env, đảm bảo tách biệt giữa dev/staging/production",
+      "Sử dụng config caching (php artisan config:cache) trong production",
+      "Cấu hình logging với rotation để tránh file log quá lớn"
+    ]
+  },
+  "validation": {
+    "rule": "curso",
+    "description": "Sử dụng rule curso để validate dữ liệu đầu vào trong FormRequest classes, tích hợp chặt chẽ với Laravel's validation system, hỗ trợ custom rules và error messages đa ngôn ngữ."
+  },
+  "logging": {
+    "enabled": true,
+    "channels": ["daily", "sentry"],
+    "description": "Sử dụng Laravel Logging với channel daily cho local và Sentry cho production để theo dõi lỗi và hiệu suất."
+  },
+  "monitoring": {
+    "tools": ["Laravel Telescope (dev)", "Sentry (production)"],
+    "description": "Sử dụng Telescope để debug trong môi trường dev và Sentry để giám sát lỗi trong production."
+  }
+}
