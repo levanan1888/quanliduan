@@ -16,7 +16,7 @@ use App\Http\Controllers\Admin\RbacController;
 |
 */
 
-Route::get('/auth/register', [AuthController::class, 'register']);
+Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
