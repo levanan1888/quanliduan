@@ -3,7 +3,11 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Admin\RbacController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\SprintController;
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\SubTaskController;
+use App\Http\Controllers\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,49 +20,41 @@ use App\Http\Controllers\Admin\RbacController;
 |
 */
 
+// Public routes
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/refresh', [AuthController::class, 'refresh']); // No auth needed, uses refresh_token
 
+// Authenticated routes
 Route::middleware('auth:sanctum')->group(function () {
+    // Auth routes
     Route::post('/auth/logout', [AuthController::class, 'logout']);
-    Route::get('/user', function (Request $request) {
-        return $request->user();
+    Route::get('/auth/me', [AuthController::class, 'me']);
+
+    // Projects (PM → Project)
+    Route::apiResource('projects', ProjectController::class);
+
+    // Sprints (Project → Sprint)
+    Route::prefix('projects/{project}')->group(function () {
+        Route::apiResource('sprints', SprintController::class);
     });
 
-    // Example protected routes with Spatie Permissions
-    Route::get('/admin/overview', function () {
-        return response()->json(['message' => 'Admin content']);
-    })->middleware(\Spatie\Permission\Middleware\RoleMiddleware::class . ':admin');
+    // Tasks
+    Route::apiResource('tasks', TaskController::class);
+    Route::post('/tasks/{task}/assets', [TaskController::class, 'uploadAsset']);
+    Route::get('/tasks/{task}/activities', [TaskController::class, 'activities']);
 
-    Route::get('/reports/export', function () {
-        return response()->json(['message' => 'Exported']);
-    })->middleware(\Spatie\Permission\Middleware\PermissionMiddleware::class . ':export reports');
+    // SubTasks (Task → SubTask)
+    Route::prefix('tasks/{task}')->group(function () {
+        Route::apiResource('sub-tasks', SubTaskController::class)->except(['show']);
+    });
 
-    // RBAC admin routes
-    Route::middleware(\Spatie\Permission\Middleware\RoleMiddleware::class . ':admin')->group(function () {
-        // roles
-        Route::get('/roles', [RbacController::class, 'listRoles']);
-        Route::post('/roles', [RbacController::class, 'createRole']);
-        Route::delete('/roles/{role}', [RbacController::class, 'deleteRole']);
-
-        // permissions
-        Route::get('/permissions', [RbacController::class, 'listPermissions']);
-        Route::post('/permissions', [RbacController::class, 'createPermission']);
-        Route::delete('/permissions/{permission}', [RbacController::class, 'deletePermission']);
-
-        // assignments: user ↔ role/permission
-        Route::post('/users/{userId}/roles', [RbacController::class, 'assignRoleToUser']);
-        Route::delete('/users/{userId}/roles/{role}', [RbacController::class, 'removeRoleFromUser']);
-
-        Route::post('/users/{userId}/permissions', [RbacController::class, 'assignPermissionToUser']);
-        Route::delete('/users/{userId}/permissions/{permission}', [RbacController::class, 'revokePermissionFromUser']);
-
-        // assignments: role ↔ permission
-        Route::post('/roles/{role}/permissions', [RbacController::class, 'assignPermissionToRole']);
-        Route::delete('/roles/{role}/permissions/{permission}', [RbacController::class, 'revokePermissionFromRole']);
-
-        // lookups
-        Route::get('/users/{userId}/roles', [RbacController::class, 'userRoles']);
-        Route::get('/users/{userId}/permissions', [RbacController::class, 'userPermissions']);
+    // Notifications
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [NotificationController::class, 'index']);
+        Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
+        Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+        Route::patch('/{notification}/read', [NotificationController::class, 'markAsRead']);
+        Route::delete('/{notification}', [NotificationController::class, 'destroy']);
     });
 });

@@ -19,3 +19,7 @@ Route::get('/', [DocsController::class, 'apiHtml']);
 // Tài liệu API đơn giản
 Route::get('/api-docs', [DocsController::class, 'apiHtml']);
 Route::get('/api-docs.json', [DocsController::class, 'apiJson']);
+
+// Export Postman Collection
+Route::get('/postman-collection', [\App\Http\Controllers\PostmanCollectionController::class, 'export']);
+Route::get('/postman-collection/download', [\App\Http\Controllers\PostmanCollectionController::class, 'download']);
