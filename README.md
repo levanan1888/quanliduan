@@ -11,18 +11,6 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/levanan1888/quanliduan/actions">
-    <p align="center">
-  <!-- Nhúng video YouTube (iframe) -->
-  <iframe 
-    width="560" 
-    height="315" 
-    src="https://www.youtube.com/embed/TRvwocRje3c" 
-    title="QuanLiDuan Demo" 
-    frameborder="0" 
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-    allowfullscreen>
-  </iframe>
 </p>
   </a>
   <a href="https://packagist.org/packages/laravel/framework">
