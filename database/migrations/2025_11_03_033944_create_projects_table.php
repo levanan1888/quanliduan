@@ -13,7 +13,17 @@ return new class extends Migration
     {
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
+            $table->string('name', 255);
+            $table->text('description')->nullable();
+            $table->enum('status', ['active', 'archived', 'completed'])->default('active');
+            $table->foreignId('manager_id')->constrained('users')->onDelete('restrict');
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
             $table->timestamps();
+
+            // Indexes
+            $table->index('manager_id');
+            $table->index('status');
         });
     }
 
