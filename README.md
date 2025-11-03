@@ -30,37 +30,3 @@
     <img src="https://img.shields.io/badge/Watch%20Demo-%23FF0000?style=for-the-badge&logo=youtube" alt="Watch Demo">
   </a>
 </p>
-
----
-
-## Mục tiêu dự án
-
-**QuanLiDuan** là hệ thống **quản lý dự án nhẹ**, được thiết kế dành riêng cho:
-
-- **Team nhỏ (3–10 người)**
-- **Freelancer & Startup**
-- **Không cần tính năng phức tạp như Jira hay Trello**
-
-> **Giúp team theo dõi tiến độ, phân công task, quản lý deadline một cách đơn giản, trực quan.**
-
----
-
-## Tính năng chính
-
-| Tính năng             | Mô tả |
-|-----------------------|------|
-| **Quản lý dự án**     | Tạo, sửa, xóa dự án |
-| **Phân công task**    | Giao việc cho thành viên |
-| **Kanban Board**      | Todo / Doing / Done |
-| **Deadline & nhắc nhở** | Cảnh báo task sắp đến hạn |
-| **Báo cáo đơn giản**  | Tổng giờ làm, % hoàn thành |
-| **Giao diện thân thiện** | Dễ dùng, không cần đào tạo |
-
----
-
-## Công nghệ sử dụng
-
-```text
-Laravel 10+     • Livewire / Inertia.js
-Tailwind CSS    • MySQL / SQLite
-Git + GitHub    • PHP 8.2+
