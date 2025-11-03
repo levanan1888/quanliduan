@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/levanan1888/quanliduan/actions">
-    <img src="https://github.com/levanan1888/quanliduan/workflows/tests/badge.svg" alt="Tests">
+   <a href="https://www.youtube.com/watch?v=JxZutalTcPI&list=RDJxZutalTcPI&start_radio=1">
   </a>
   <a href="https://packagist.org/packages/laravel/framework">
     <img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads">
@@ -47,13 +47,7 @@ Giúp team **theo dõi tiến độ, phân công task, quản lý deadline** m�
 
 ---
 
-## Công nghệ sử dụng
 
-- **Laravel 10+** – Backend mạnh mẽ, bảo mật
-- **Livewire / Inertia.js** – Giao diện mượt mà (tùy chọn)
-- **Tailwind CSS** – Thiết kế hiện đại, responsive
-- **MySQL / SQLite** – Cơ sở dữ liệu linh hoạt
-- **Git + GitHub** – Quản lý mã nguồn
 
 ---
 
