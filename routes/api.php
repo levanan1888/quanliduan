@@ -8,6 +8,7 @@ use App\Http\Controllers\SprintController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\SubTaskController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\MemberController;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,4 +58,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/{notification}/read', [NotificationController::class, 'markAsRead']);
         Route::delete('/{notification}', [NotificationController::class, 'destroy']);
     });
+
+    // Members
+    Route::get('/members', [MemberController::class, 'index']);
 });
