@@ -9,6 +9,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\SubTaskController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -61,4 +62,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Members
     Route::get('/members', [MemberController::class, 'index']);
+
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index']);
 });

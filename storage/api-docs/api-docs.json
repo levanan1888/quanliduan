@@ -271,6 +271,167 @@
                 ]
             }
         },
+        "/api/dashboard": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get dashboard statistics",
+                "description": "Get comprehensive dashboard statistics including projects, tasks, activities, and notifications. PM sees all statistics, MEMBER sees only their assigned data.",
+                "operationId": "f9ae6bf029fd5455620e57be01c3b831",
+                "responses": {
+                    "200": {
+                        "description": "Dashboard statistics",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "overview": {
+                                            "properties": {
+                                                "total_projects": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "total_tasks": {
+                                                    "type": "integer",
+                                                    "example": 45
+                                                },
+                                                "total_members": {
+                                                    "type": "integer",
+                                                    "example": 25
+                                                },
+                                                "total_sprints": {
+                                                    "type": "integer",
+                                                    "example": 8
+                                                },
+                                                "my_tasks": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "overdue_tasks": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "unread_notifications": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "tasks_by_status": {
+                                            "properties": {
+                                                "TO_DO": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                },
+                                                "IN_PROGRESS": {
+                                                    "type": "integer",
+                                                    "example": 20
+                                                },
+                                                "COMPLETED": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "tasks_by_priority": {
+                                            "properties": {
+                                                "HIGH": {
+                                                    "type": "integer",
+                                                    "example": 8
+                                                },
+                                                "MEDIUM": {
+                                                    "type": "integer",
+                                                    "example": 25
+                                                },
+                                                "LOW": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "projects_by_status": {
+                                            "properties": {
+                                                "active": {
+                                                    "type": "integer",
+                                                    "example": 7
+                                                },
+                                                "archived": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "completed": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "recent_activities": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "type": {
+                                                        "type": "string"
+                                                    },
+                                                    "content": {
+                                                        "type": "string"
+                                                    },
+                                                    "user": {
+                                                        "type": "object"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "upcoming_deadlines": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "title": {
+                                                        "type": "string"
+                                                    },
+                                                    "date": {
+                                                        "type": "string",
+                                                        "format": "date"
+                                                    },
+                                                    "project": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/members": {
             "get": {
                 "tags": [
@@ -1667,13 +1828,14 @@
                 "tags": [
                     "Tasks"
                 ],
-                "summary": "Upload image to task",
-                "description": "Upload image asset to task",
+                "summary": "Upload images to task",
+                "description": "Upload one or multiple images to a task. Accepts single image or array of images.",
                 "operationId": "91dcf6f9158a38edca4caedc9616b0c9",
                 "parameters": [
                     {
                         "name": "task",
                         "in": "path",
+                        "description": "Task ID",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -1686,7 +1848,16 @@
                         "multipart/form-data": {
                             "schema": {
                                 "properties": {
+                                    "images[]": {
+                                        "description": "Array of image files (supports multiple uploads)",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    },
                                     "image": {
+                                        "description": "Single image file (alternative to images[] for backward compatibility)",
                                         "type": "string",
                                         "format": "binary"
                                     }
@@ -1698,7 +1869,50 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Image uploaded successfully"
+                        "description": "Images uploaded successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "description": "Array of uploaded asset objects",
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "task_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "image_url": {
+                                                        "type": "string",
+                                                        "example": "/storage/task-assets/abc123.jpg"
+                                                    },
+                                                    "uploaded_by": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "uploaded_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "count": {
+                                            "description": "Number of images uploaded",
+                                            "type": "integer",
+                                            "example": 3
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "description": "Unauthenticated"
@@ -2023,6 +2237,10 @@
         {
             "name": "Notifications",
             "description": "Notification management endpoints"
+        },
+        {
+            "name": "Dashboard",
+            "description": "Dashboard"
         },
         {
             "name": "Members",
