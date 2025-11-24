@@ -358,19 +358,62 @@ class TaskController extends Controller
     }
 
     /**
-     * Upload image asset to task
+     * Upload image assets to task (supports multiple images)
      *
      * @OA\Post(
      *     path="/api/tasks/{task}/assets",
      *     tags={"Tasks"},
-     *     summary="Upload image to task",
+     *     summary="Upload images to task",
+     *     description="Upload one or multiple images to a task. Accepts single image or array of images.",
      *     security={{"sanctum": {}}},
-     *     @OA\Parameter(name="task", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\RequestBody(required=true, @OA\MediaType(
-     *         mediaType="multipart/form-data",
-     *         @OA\Schema(@OA\Property(property="image", type="string", format="binary"))
-     *     )),
-     *     @OA\Response(response=201, description="Image uploaded successfully"),
+     *     @OA\Parameter(
+     *         name="task",
+     *         in="path",
+     *         required=true,
+     *         description="Task ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                     property="images[]",
+     *                     type="array",
+     *                     description="Array of image files (supports multiple uploads)",
+     *                     @OA\Items(type="string", format="binary")
+     *                 ),
+     *                 @OA\Property(
+     *                     property="image",
+     *                     type="string",
+     *                     format="binary",
+     *                     description="Single image file (alternative to images[] for backward compatibility)"
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Images uploaded successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 description="Array of uploaded asset objects",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="task_id", type="integer", example=1),
+     *                     @OA\Property(property="image_url", type="string", example="/storage/task-assets/abc123.jpg"),
+     *                     @OA\Property(property="uploaded_by", type="integer", example=1),
+     *                     @OA\Property(property="uploaded_at", type="string", format="date-time")
+     *                 )
+     *             ),
+     *             @OA\Property(property="count", type="integer", example=3, description="Number of images uploaded")
+     *         )
+     *     ),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Permission denied"),
      *     @OA\Response(response=422, description="Validation error")
@@ -378,10 +421,6 @@ class TaskController extends Controller
      */
     public function uploadAsset(Request $request, Task $task)
     {
-        $request->validate([
-            'image' => ['required', 'image', 'max:5120'], // 5MB max
-        ]);
-
         // Check access
         $user = $request->user();
         $canEdit = $user->role === 'PM' || 
@@ -394,24 +433,73 @@ class TaskController extends Controller
             ], 403);
         }
 
-        $path = $request->file('image')->store('task-assets', 'public');
-        $url = Storage::url($path);
-
-        $asset = $task->assets()->create([
-            'image_url' => $url,
-            'uploaded_by' => $user->id,
+        // Validate: accept both single image and array of images
+        $request->validate([
+            'images' => ['sometimes', 'array', 'min:1'],
+            'images.*' => ['required', 'image', 'max:5120'], // 5MB max per image
+            'image' => ['sometimes', 'image', 'max:5120'], // Backward compatibility: single image
         ]);
 
-        // Log activity
+        // Ensure at least one image is provided
+        if (! $request->hasFile('images') && ! $request->hasFile('image')) {
+            return response()->json([
+                'message' => 'No images provided. Please upload at least one image using "images[]" or "image" field.',
+            ], 422);
+        }
+
+        $uploadedAssets = [];
+        $uploadedUrls = [];
+
+        // Handle array of images (preferred method)
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('task-assets', 'public');
+                $url = Storage::url($path);
+
+                $asset = $task->assets()->create([
+                    'image_url' => $url,
+                    'uploaded_by' => $user->id,
+                ]);
+
+                $uploadedAssets[] = $asset;
+                $uploadedUrls[] = $url;
+            }
+        }
+        // Handle single image (backward compatibility)
+        elseif ($request->hasFile('image')) {
+            $path = $request->file('image')->store('task-assets', 'public');
+            $url = Storage::url($path);
+
+            $asset = $task->assets()->create([
+                'image_url' => $url,
+                'uploaded_by' => $user->id,
+            ]);
+
+            $uploadedAssets[] = $asset;
+            $uploadedUrls[] = $url;
+        }
+
+        // Log activity for all uploaded images
+        $imageCount = count($uploadedUrls);
+        $activityContent = $imageCount === 1 
+            ? "Image uploaded: {$uploadedUrls[0]}"
+            : "{$imageCount} images uploaded";
+
         TaskActivity::create([
             'task_id' => $task->id,
             'user_id' => $user->id,
             'type' => 'asset_added',
-            'content' => "Image uploaded: {$url}",
-            'metadata' => ['asset_url' => $url],
+            'content' => $activityContent,
+            'metadata' => [
+                'asset_urls' => $uploadedUrls,
+                'count' => $imageCount,
+            ],
         ]);
 
-        return response()->json($asset, 201);
+        return response()->json([
+            'data' => $uploadedAssets,
+            'count' => count($uploadedAssets),
+        ], 201);
     }
 
     /**
